@@ -56,20 +56,22 @@ def handle_incoming_messages():
         voice_filename_wav = "voice_" + sender + ".wav"
         with open(voice_filename, "wb") as o:
             o.write(g.content)
+        if source == 'telegram' and topic == 'queries':
+            AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="mp3")
+            try:
+                resp = client.speech(open(voice_filename_wav, 'rb'), None,
+                                     {'Content-Type': 'audio/mpeg3', 'Transfer-encoding': 'chunked'})
+                logging.info(resp)
+                os.remove(voice_filename_wav)
+                os.remove(voice_filename)
+                return jsonify(resp), 200
+            except:
+                logging.info(PrintException())
+                os.remove(voice_filename)
+                os.remove(voice_filename_wav)
+                return 404
         if source == 'telegram':
             AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="wav")
-            if topic == 'queries':
-                try:
-                    resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/wav'})
-                    logging.info(resp)
-                    os.remove(voice_filename_wav)
-                    os.remove(voice_filename)
-                    return jsonify(resp), 200
-                except:
-                    logging.info(PrintException())
-                    os.remove(voice_filename)
-                    os.remove(voice_filename_wav)
-                    return 404
         elif source == 'facebook':
             try:
                 AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")  # android
