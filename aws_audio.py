@@ -26,8 +26,10 @@ def PrintException():
     line = linecache.getline(filename, lineno, f.f_globals)
     return 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
 
-def yandex_api_post(voice_filename_wav, topic, lang=None):
+def yandex_api_post(voice_filename_wav, topic, lang=None, audio_type=None):
     headers = {'Content-Type': 'audio/x-mpeg-3'}
+    if audio_type:
+        headers = {'Content-Type': audio_type}
     url = 'http://asr.yandex.net/asr_xml?uuid=' + uuid + '&key=' + api_key + '&topic=' + topic
     if lang == 'en-US':
         url += '&lang=' + lang
@@ -67,6 +69,17 @@ def handle_incoming_messages():
         voice_filename_wav = "voice_" + sender + ".wav"
         with open(voice_filename, "wb") as o:
             o.write(g.content)
+        if source == 'telegram' and topic == 'test_queries':
+            AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="mp3")
+            start = time.time()
+            resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/mpeg3'})
+            logging.info('client.speech with audio/mpeg3 = ' + str(time.time() - start))
+
+            AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="wav")
+            start = time.time()
+            resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/wav'})
+            logging.info('client.speech with audio/wav = ' + str(time.time() - start))
+            return jsonify(resp), 200
         if source == 'telegram':
             AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="mp3")
         elif source == 'facebook':
