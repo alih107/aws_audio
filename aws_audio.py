@@ -7,6 +7,7 @@ import os
 import logging
 import sys
 import linecache
+import time
 import constants
 
 app = Flask(__name__)
@@ -77,7 +78,9 @@ def handle_incoming_messages():
                 os.remove(voice_filename_wav)
                 return 404
 
+        start = time.time()
         r = yandex_api_post(voice_filename_wav, topic)
+        logging.info('yandex_api_post time = ' + str(time.time() - start))
         logging.info(r.text)
         try:
             os.remove(voice_filename)
