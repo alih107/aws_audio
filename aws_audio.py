@@ -60,7 +60,7 @@ def handle_incoming_messages():
             AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="mp3")
             try:
                 resp = client.speech(open(voice_filename_wav, 'rb'), None,
-                                     {'Content-Type': 'audio/mpeg3', 'Transfer-Encoding': 'chunked'})
+                                     {'Content-Type': 'audio/mpeg3'})
                 logging.info(resp)
                 os.remove(voice_filename_wav)
                 os.remove(voice_filename)
