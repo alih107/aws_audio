@@ -40,11 +40,8 @@ def extract_digits(message):
     return message
 
 @app.route('/bot_audio', methods=['GET'])
-def hande_get_messages():
-    logging.info('GET request!')
-    logging.info(request.args)
-    time = request.args.get('time')
-    return time, 200
+def handle_get_messages():
+    return 'Hello world!'
 
 @app.route('/bot_audio', methods=['POST'])
 def handle_incoming_messages():
