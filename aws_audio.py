@@ -70,13 +70,13 @@ def handle_incoming_messages():
         with open(voice_filename, "wb") as o:
             o.write(g.content)
         if source == 'telegram' and topic == 'test_queries':
-            AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="mp3")
             start = time.time()
+            AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="mp3")
             resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/mpeg3'})
             logging.info('client.speech with audio/mpeg3 = ' + str(time.time() - start))
 
-            AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="wav")
             start = time.time()
+            AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="wav")
             resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/wav'})
             logging.info('client.speech with audio/wav = ' + str(time.time() - start))
             return jsonify(resp), 200
