@@ -26,7 +26,7 @@ def PrintException():
     return 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
 
 def yandex_api_post(voice_filename_wav, topic, lang=None):
-    headers = {'Content-Type': 'audio/x-wav'}
+    headers = {'Content-Type': 'audio/x-mpeg-3'}
     url = 'http://asr.yandex.net/asr_xml?uuid=' + uuid + '&key=' + api_key + '&topic=' + topic
     if lang == 'en-US':
         url += '&lang=' + lang
@@ -56,11 +56,17 @@ def handle_incoming_messages():
         voice_filename_wav = "voice_" + sender + ".wav"
         with open(voice_filename, "wb") as o:
             o.write(g.content)
-        if source == 'telegram' and topic == 'queries':
+        if source == 'telegram':
             AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="mp3")
+        elif source == 'facebook':
             try:
-                resp = client.speech(open(voice_filename_wav, 'rb'), None,
-                                     {'Content-Type': 'audio/mpeg3'})
+                AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="mp3")  # android
+            except:
+                AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="mp3")  # iphone
+
+        if source == 'telegram' and topic == 'queries':
+            try:
+                resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/mpeg3'})
                 logging.info(resp)
                 os.remove(voice_filename_wav)
                 os.remove(voice_filename)
@@ -70,13 +76,6 @@ def handle_incoming_messages():
                 os.remove(voice_filename)
                 os.remove(voice_filename_wav)
                 return 404
-        if source == 'telegram':
-            AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="wav")
-        elif source == 'facebook':
-            try:
-                AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")  # android
-            except:
-                AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")  # iphone
 
         r = yandex_api_post(voice_filename_wav, topic)
         logging.info(r.text)
