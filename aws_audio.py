@@ -39,6 +39,11 @@ def extract_digits(message):
             message = message.replace(i, '')
     return message
 
+@app.route('/', methods=['GET'])
+def handle_incoming_messages():
+    time = request.args.get('time')
+    return time, 200
+
 @app.route('/bot_audio', methods=['POST'])
 def handle_incoming_messages():
     try:
