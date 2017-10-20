@@ -42,6 +42,7 @@ def extract_digits(message):
 @app.route('/bot_audio', methods=['GET'])
 def handle_get_messages():
     try:
+        logging.info('GOT GET MESSAGE')
         incoming_time = request.args.get('time')
         return incoming_time + " | " + str(time.time())
     except:
