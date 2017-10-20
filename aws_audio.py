@@ -39,7 +39,7 @@ def extract_digits(message):
             message = message.replace(i, '')
     return message
 
-@app.route('/', methods=['GET'])
+@app.route('/bot_audio', methods=['GET'])
 def handle_incoming_messages():
     time = request.args.get('time')
     return time, 200
