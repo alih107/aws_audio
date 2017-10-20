@@ -43,7 +43,7 @@ def extract_digits(message):
 def handle_get_messages():
     try:
         incoming_time = request.args.get('time')
-        return str(incoming_time) + " | " + str(time.time())
+        return incoming_time + " | " + str(time.time())
     except:
         logging.info(PrintException())
         return 'Hello world! no time!'
