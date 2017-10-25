@@ -15,7 +15,8 @@ uuid = constants.uuid
 api_key = constants.api_key
 client = Wit(constants.wit_token)
 logging.basicConfig(filename='log_audio.log', level=logging.INFO,
-                    format='[%(levelname)s] (%(threadName)-10s) %(message)s')
+                    format='[%(levelname)s] %(asctime)s (%(threadName)-10s) %(message)s',
+                    datefmt = '%m/%d/%Y %H:%M:%S')
 
 def PrintException():
     exc_type, exc_obj, tb = sys.exc_info()
@@ -53,10 +54,12 @@ def handle_get_messages():
 
 @app.route('/bot_audio', methods=['POST'])
 def handle_incoming_messages():
+    log_message = ''
     try:
         data = request.json
-        logging.info(data)
+        #logging.info(data)
         voice_url, topic, source, sender = data['url'], data['topic'], data['source'], data['id']
+        log_message += topic + ' | ' + source + ' | '
         g = requests.get(voice_url, stream=True)
         count = 0
         while g.status_code != 200 and count < 10:
@@ -91,12 +94,12 @@ def handle_incoming_messages():
         if source == 'telegram' and topic == 'queries':
             try:
                 resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/mpeg3'})
-                logging.info(resp)
+                logging.info(log_message + str(resp))
                 os.remove(voice_filename_wav)
                 os.remove(voice_filename)
                 return jsonify(resp), 200
             except:
-                logging.info(PrintException())
+                logging.error(log_message + PrintException())
                 os.remove(voice_filename)
                 os.remove(voice_filename_wav)
                 return 404
@@ -115,13 +118,16 @@ def handle_incoming_messages():
             return 404
         if topic == 'numbers':
             yandex_numbers = extract_digits(root[0].text)
+            logging.info(log_message + yandex_numbers)
             return jsonify({'numbers': yandex_numbers}), 200
         elif topic == 'queries':
             try:
                 resp = client.message(root[0].text)
             except:
+                logging.info(log_message + PrintException())
                 return 404
             if source == 'telegram':
+                logging.info(log_message + str(resp))
                 return jsonify(resp), 200
             elif source == 'facebook':
                 entities = resp['entities']
@@ -132,13 +138,15 @@ def handle_incoming_messages():
                         if i['confidence'] > max_confidence:
                             max_confidence = i['confidence']
                             intent = i['value']
+                    logging.info(log_message + 'intent = ' + intent)
                     return jsonify({'intent': intent}), 200
                 else:
                     return 404
 
+        logging.info(log_message + 'shit happened')
         return jsonify({'message': 'idi nahui'}), 404
     except:
-        logging.error(PrintException())
+        logging.info(log_message + PrintException())
         return 404
 
 if __name__ == '__main__':
