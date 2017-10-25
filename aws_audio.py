@@ -9,11 +9,20 @@ import sys
 import linecache
 import time
 import constants
+from datetime import datetime
+from pytz import timezone, utc
+
+def customTime(*args):
+    utc_dt = utc.localize(datetime.utcnow())
+    my_tz = timezone("Asia/Almaty")
+    converted = utc_dt.astimezone(my_tz)
+    return converted.timetuple()
 
 app = Flask(__name__)
 uuid = constants.uuid
 api_key = constants.api_key
 client = Wit(constants.wit_token)
+logging.Formatter.converter = customTime
 logging.basicConfig(filename='log_audio.log', level=logging.INFO,
                     format='[%(levelname)s] %(asctime)s (%(threadName)-10s) %(message)s',
                     datefmt = '%m/%d/%Y %H:%M:%S')
