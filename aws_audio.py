@@ -115,6 +115,8 @@ def handle_incoming_messages():
 
         start = time.time()
         r = yandex_api_post(voice_filename_wav, topic)
+        if r.status_code != 200:
+            return 404
         logging.info('yandex_api_post time = ' + str(time.time() - start))
         logging.info(r.text)
         try:
