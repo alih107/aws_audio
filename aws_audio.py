@@ -155,7 +155,7 @@ def handle_incoming_messages():
                     return 404
 
         logging.info(log_message + 'shit happened')
-        return jsonify({'message': 'idi nahui'}), 404
+        return 404
     except:
         logging.info(log_message + PrintException())
         return 404
